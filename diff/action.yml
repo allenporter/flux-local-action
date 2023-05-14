@@ -40,6 +40,7 @@ runs:
     - name: flux-local diff
       id: flux_diff
       run: |
+        cd ..
         flux-local diff ${{ inputs.resource }} -o yaml --unified 6 --path pr/${{ inputs.path }} --path-orig live/${{ inputs.path }} > diffs
         diffs=$(cat diffs)
         echo "${diffs}"
