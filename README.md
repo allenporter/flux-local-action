@@ -10,4 +10,13 @@ validate flux `HelmRelease` builds and also verify that all objects pass
 kyverno policies (e.g. for determining there are no deprecated api resources
 or that ingress objects are valid).
 
-TODO: Example
+This example will run `flux-local test` against the cluster in `clusters/prod` with
+helm release expansion enabled.
+
+```yaml
+- uses: allenporter/flux-local-action/test@v1
+  with:
+    path: clusters/prod
+    enable-helm: true
+    enable-kyverno: false
+```
