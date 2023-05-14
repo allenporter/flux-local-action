@@ -25,10 +25,11 @@ runs:
        python-version: ${{ inputs.python-version }}
     - name: Checkout PR branch
       uses: actions/checkout@v3
+        path: pr
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install -r ${GITHUB_WORKSPACE}/pr/requirements.txt
       shell: bash
     - name: Checkout live branch
       uses: actions/checkout@v3
@@ -38,8 +39,8 @@ runs:
     - name: flux-local diff
       id: flux_diff
       run: |
-        flux-local diff ${{ inputs.resource }} -o yaml --unified 6 --path ${{ inputs.path }} --path-orig live/${{ inputs.path }} > diffs
-        diffs=$(cat diffs)
+        flux-local diff ${{ inputs.resource }} -o yaml --unified 6 --path ${GITHUB_WORKSPACE}/pr/${{ inputs.path }} --path-orig ${GITHUB_WORKSPACE}/live/${{ inputs.path }} > ${GITHUB_WORKSPACE}/diffs
+        diffs=$(cat ${GITHUB_WORKSPACE}/diffs)
         echo "${diffs}"
         echo "diff<<${delimiter}" >> $GITHUB_OUTPUT
         echo "${diffs}" >> $GITHUB_OUTPUT
