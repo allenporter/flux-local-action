@@ -1,0 +1,46 @@
+---
+name: flux-local diff
+description: Build the cluster and diff the PR against the existing cluster
+inputs:
+  path:
+    description: Path to the root of the flux cluster GitRepository and Kustomization
+    required: true
+  resource:
+    description: Type of resource to diff, either 'kustomization' or 'helmrelease' 
+    required: true
+    default: kustomization
+  python-version:
+    description: Python version used for running flux-local
+    default: '3.10'
+outputs:
+  diff_output: "${{ steps.flux_diff.outputs.diff }}"
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+       python-version: ${{ inputs.python-version }}
+    - name: Checkout PR branch
+      uses: actions/checkout@v3
+      with:
+        path: pr
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r pr/requirements.txt
+      shell: bash
+    - name: Checkout live branch
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ env.conf_live_branch }}
+        path: live
+    - name: flux-local diff
+      id: flux_diff
+      run: |
+        flux-local diff ${{ inputs.resource }} -o yaml --unified 6 --path pr/${{ inputs.path }} --path-orig live/${{ inputs.path }} > diffs
+        diffs=$(cat diffs)
+        echo "${diffs}"
+        echo "diff<<${delimiter}" >> $GITHUB_OUTPUT
+        echo "${diffs}" >> $GITHUB_OUTPUT
+        echo "${delimiter}" >> $GITHUB_OUTPUT
