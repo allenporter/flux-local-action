@@ -40,12 +40,12 @@ runs:
         uri: https://github.com/kyverno/kyverno/releases/download/${{ inputs.kyverno-version }}/kyverno-cli_${{ inputs.kyverno-version }}_linux_x86_64.tar.gz
         name: 'kyverno-cli'
         version: ${{ inputs.kyverno-version }}
-      if: ${{ inputs.enable-kyverno == true }}
+      if: ${{ inputs.enable-kyverno == 'true' }}
     - name: Test cluster (flux-local)
       run: |
         flux-local test \
-          --${{ inputs.enable-helm == 'true' && '' || 'no-' }}enable-helm \
-          --${{ inputs.enable-kyverno == 'true' && '' || 'no-' }}enable-kyverno \
+          --${{ inputs.enable-helm != 'true' && 'no' || '' }}enable-helm }} \
+          --${{ inputs.enable-kyverno != 'true' && 'no' || '' }}enable-kyverno }} \
           --api-versions "${{ inputs.api-versions }}" \
           --path ${{ inputs.path }}
       shell: bash
