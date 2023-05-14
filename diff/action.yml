@@ -25,6 +25,7 @@ runs:
        python-version: ${{ inputs.python-version }}
     - name: Checkout PR branch
       uses: actions/checkout@v3
+      with:
         path: pr
     - name: Install dependencies
       run: |
