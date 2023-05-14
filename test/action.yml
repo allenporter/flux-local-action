@@ -1,0 +1,48 @@
+---
+name: flux-local test
+description: Build the cluster and run validation checks
+inputs:
+  path:
+    description: Path to the root of the flux cluster GitRepository and Kustomization
+    required: true
+  enable_helm:
+    description: Build HelmRelease objects and validate outputs
+    default: true
+    required: false
+  api_versions:
+    description: Kubernetes api versions used for helm Capabilities.APIVersions
+    default: policy/v1/PodDisruptionBudget
+    required: false
+  enable_kyverno:
+    description: Validate cluster resources against kyverno policies found in the cluster
+    default: true
+    required: false
+  kyverno_version:
+    description: Kyverno version to use when enabled
+    default: v1.9.0
+  python_version:
+    description: Python version used for running flux-local
+    default: 3.10
+runs:
+  using: "composite"
+  steps:
+    - uses: supplypike/setup-bin@v3
+      with:
+        uri: 'https://github.com/kyverno/kyverno/releases/download/${{ kyverno_version }}/kyverno-cli_${{ kyverno_version }}_linux_x86_64.tar.gz'
+        name: 'kyverno-cli'
+        version: ${{ kyverno_version }}
+      if: ${{ enable_kyverno == true }}
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ python_version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Test cluster (flux-local)
+      run: |
+        flux-local test \
+          --${{ enable_helm && "" || "no-" }}enable-helm \
+          --${{ enable_kyverno && "" || "no-" }}enable-kyverno \
+          --api-versions "${{ api_versions }}" \
