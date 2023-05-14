@@ -15,7 +15,7 @@ inputs:
     required: false
   enable-kyverno:
     description: Validate cluster resources against kyverno policies found in the cluster
-    default: true
+    default: false
     required: false
   kyverno-version:
     description: Kyverno version to use when enabled
