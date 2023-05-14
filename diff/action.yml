@@ -41,6 +41,7 @@ runs:
       id: flux_diff
       run: |
         flux-local diff ${{ inputs.resource }} -o yaml --unified 6 --path ${GITHUB_WORKSPACE}/pr/${{ inputs.path }} --path-orig ${GITHUB_WORKSPACE}/live/${{ inputs.path }} > ${GITHUB_WORKSPACE}/diffs
+        delimiter="$(openssl rand -hex 8)"
         diffs=$(cat ${GITHUB_WORKSPACE}/diffs)
         echo "${diffs}"
         echo "diff<<${delimiter}" >> $GITHUB_OUTPUT
