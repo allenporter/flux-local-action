@@ -46,3 +46,4 @@ runs:
         echo "diff<<${delimiter}" >> $GITHUB_OUTPUT
         echo "${diffs}" >> $GITHUB_OUTPUT
         echo "${delimiter}" >> $GITHUB_OUTPUT
+      shell: bash
