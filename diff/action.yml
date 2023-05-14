@@ -9,6 +9,15 @@ inputs:
     description: Type of resource to diff, either 'kustomization' or 'helmrelease' 
     required: true
     default: kustomization
+  diff-lines:
+    description: Number of diff lines to show
+    default: 6
+  skip-secrets:
+    description: When true, does not attempt to diff secrets
+    default: true
+  skip-crds:
+    description: When true, does not attempt to diff crds
+    default: true
   python-version:
     description: Python version used for running flux-local
     default: '3.10'
@@ -40,11 +49,15 @@ runs:
     - name: flux-local diff
       id: flux_diff
       run: |
-        flux-local diff ${{ inputs.resource }} -o yaml --unified 6 --path ${GITHUB_WORKSPACE}/pr/${{ inputs.path }} --path-orig ${GITHUB_WORKSPACE}/live/${{ inputs.path }} > ${GITHUB_WORKSPACE}/diffs
         delimiter="$(openssl rand -hex 8)"
-        diffs=$(cat ${GITHUB_WORKSPACE}/diffs)
-        echo "${diffs}"
         echo "diff<<${delimiter}" >> $GITHUB_OUTPUT
-        echo "${diffs}" >> $GITHUB_OUTPUT
+        flux-local diff ${{ inputs.resource }} \
+            --unified ${{ inputs.diff-lines }} \
+            --path ${GITHUB_WORKSPACE}/pr/${{ inputs.path }} \
+            --path-orig ${GITHUB_WORKSPACE}/live/${{ inputs.path }} \
+            --${{ inputs.skip-crds != 'true' && 'no-' || '' }}skip-crds \
+            --${{ inputs.skip-secrets != 'true' && 'no-' || '' }}skip-secrets \
+            --all-namespaces \
+            >> $GITHUB_OUTPUT
         echo "${delimiter}" >> $GITHUB_OUTPUT
       shell: bash
